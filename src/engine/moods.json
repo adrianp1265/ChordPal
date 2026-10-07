@@ -1,0 +1,7 @@
+{
+  "none": {},
+  "bright": { "boost": ["maj", "add9", "maj7", "6", "sus2"], "damp": ["m", "m7", "dim", "m7b5"] },
+  "dark": { "boost": ["m", "m7", "m9", "m6"], "damp": ["maj", "add9", "6"] },
+  "dreamy": { "boost": ["maj7", "maj9", "add9", "sus2", "m9"], "damp": ["7", "dim", "aug"] },
+  "tense": { "boost": ["7", "dim", "dim7", "m7b5", "aug", "sus4"], "damp": ["maj7", "add9", "6"] }
+}

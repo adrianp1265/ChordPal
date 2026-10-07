@@ -1,0 +1,73 @@
+# Starter progressions, hand-written from common practice (Hooktheory's stats, standard
+# folk and house loops). Used for a genre only when Chordonomicon is not available.
+# genre | mode | weight | chords as numbers in the key (looped)
+pop | major | 40 | 1 5 6m 4
+pop | major | 25 | 6m 4 1 5
+pop | major | 20 | 1 6m 4 5
+pop | major | 14 | 4 1 5 6m
+pop | major | 12 | 1 4 6m 5
+pop | major | 10 | 1 5 4 5
+pop | major | 10 | 1 4 1 5
+pop | major | 8 | 1 3m 4 5
+pop | major | 8 | 1 5 6m 3m 4 1 4 5
+pop | major | 7 | 4 5 6m 1
+pop | major | 6 | 1 2m 4 5
+pop | major | 6 | 1 5 2m 4
+pop | major | 5 | 1 4 5 4
+pop | major | 5 | 6m 5 4 5
+pop | major | 4 | 1 1maj7 4 4m
+pop | major | 4 | 1 5 6m 4 1 5 4 4
+pop | major | 4 | 1 b7 4 1
+pop | major | 3 | 1 3 6m 4
+pop | major | 3 | 1sus4 1 4add9 6m7 5sus4 5
+pop | major | 3 | 1add9 5 6m7 4maj7
+pop | minor | 20 | 1m b6 b3 b7
+pop | minor | 12 | 1m b7 b6 b7
+pop | minor | 10 | 1m 4m b6 b7
+pop | minor | 8 | 1m b6 b7 1m
+pop | minor | 8 | 1m b3 b7 b6
+pop | minor | 6 | 1m b7 b6 5
+pop | minor | 5 | 1m 4m 5 1m
+pop | minor | 5 | b6 b7 1m 1m
+folk | major | 30 | 1 4 1 5
+folk | major | 25 | 1 4 5 1
+folk | major | 20 | 1 5 4 1
+folk | major | 15 | 1 6m 4 5
+folk | major | 12 | 1 5 6m 4
+folk | major | 10 | 6m 4 1 5
+folk | major | 10 | 1 4 6m 5
+folk | major | 8 | 1 2m 4 1
+folk | major | 8 | 1 b7 4 1
+folk | major | 6 | 1 3m 4 1
+folk | major | 6 | 1 5 6m 3m 4 1 4 5
+folk | major | 5 | 1 1 4 1 5 5 1 1
+folk | major | 5 | 1sus4 1 1sus2 1
+folk | major | 4 | 4 1 5 1
+folk | major | 4 | 1 2 4 1
+folk | minor | 15 | 1m b7 b6 b7
+folk | minor | 12 | 1m b3 b7 1m
+folk | minor | 10 | 1m 4m 1m 5
+folk | minor | 8 | 1m b7 1m b7
+folk | minor | 8 | 1m b6 b3 b7
+folk | minor | 6 | 1m 4m 5 1m
+folk | minor | 5 | 1m b7 b3 4m
+house | major | 20 | 1maj7 4maj7
+house | major | 16 | 2m7 5 1maj7 6m7
+house | major | 14 | 4maj7 5 3m7 6m7
+house | major | 12 | 6m7 4maj7 1maj7 5
+house | major | 12 | 1 5 6m 4
+house | major | 10 | 2m9 5 1maj9
+house | major | 8 | 4maj9 3m7 2m7 1maj7
+house | major | 8 | 1add9 6m7 4maj7 5sus4
+house | major | 6 | 4 5 6m 6m
+house | major | 6 | 1maj9 3m7 4maj7 4m6
+house | minor | 22 | 1m7 4m7
+house | minor | 18 | 1m9 b7 b6maj7 b7
+house | minor | 16 | 1m7 b6maj7 b3maj7 b7
+house | minor | 14 | 1m 4m b7 b3
+house | minor | 12 | 1m7 b7 b6maj7 5m7
+house | minor | 10 | 1m9 4m9
+house | minor | 8 | b6maj7 b7 1m7 1m7
+house | minor | 8 | 1m7 b3maj7 4m7 b7
+house | minor | 6 | 4m7 b7 b3maj7 b6maj7
+house | minor | 6 | 1m 1m b6 b7

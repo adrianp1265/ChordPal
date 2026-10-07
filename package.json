@@ -1,0 +1,38 @@
+{
+  "name": "chordpal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "assets": "node scripts/fetch-samples.mjs && node scripts/make-icons.mjs && node scripts/build-data.mjs",
+    "predev": "npm run assets",
+    "prebuild": "npm run assets",
+    "data": "node scripts/build-data.mjs --force",
+    "pretest": "node scripts/build-data.mjs"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tone": "^15.1.22",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "playwright-core": "^1.63.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.3"
+  }
+}
