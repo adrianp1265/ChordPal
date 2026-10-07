@@ -30,8 +30,8 @@ node tests/browser/check.mjs http://localhost:4173/   # browser checks with a fa
 
 `public/data/<genre>-<mode>.json` are built by `pipeline/build_tables.py`:
 
-They are generated, not committed: `npm run dev` / `npm run build` build them once (downloading
-JazzStandards), together with the piano samples and icons. To rebuild with Chordonomicon:
+The committed tables are built from Chordonomicon (679,577 songs) plus JazzStandards. Without them,
+`npm run dev` / `npm run build` build starter tables (JazzStandards + the starter lists). To rebuild:
 
 ```
 CHORDONOMICON=chordonomicon_v2.csv npm run data
@@ -42,7 +42,10 @@ CHORDONOMICON=chordonomicon_v2.csv npm run data
   `chords_mapping.csv` (downloaded from its GitHub repo; note that its `dim7` is half-diminished and `dimb7` is diminished).
 - **JazzStandards** ([GitHub](https://github.com/mikeoliphant/JazzStandards), no license stated: personal use).
 - **Starter lists** (`pipeline/seeds.txt`): hand-written common progressions, used for a genre only when
-  Chordonomicon is not given. Until it is, Pop, Folk and House are starter data and the app says so.
+  Chordonomicon is not given (the app then labels the genre "starter data").
+
+Songs per genre in the committed tables: All 680,959 · Pop 85,164 · Folk 44,816 · Jazz 8,376 · House 2,265
+(thin, so the app blends it with All). Pop check: after 1, the 5 follows 33% of the time (Hooktheory: 31%).
 
 ## Credits
 

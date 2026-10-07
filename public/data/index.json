@@ -1,0 +1,24 @@
+{
+ "genres": {
+  "all": {
+   "songs": 680959,
+   "source": "chordonomicon"
+  },
+  "pop": {
+   "songs": 85164,
+   "source": "chordonomicon"
+  },
+  "folk": {
+   "songs": 44816,
+   "source": "chordonomicon"
+  },
+  "jazz": {
+   "songs": 8376,
+   "source": "chordonomicon+jazzstandards"
+  },
+  "house": {
+   "songs": 2265,
+   "source": "chordonomicon"
+  }
+ }
+}
