@@ -12,7 +12,7 @@ const pct = (p: number) => (p >= 0.01 ? `${Math.round(p * 100)}%` : '<1%');
 
 /** After the chord you play: the most common 4-chord ways songs continue. */
 export function Progressions() {
-  const { current, currentVoicing, key, tables, settings, commit } = useStore();
+  const { current, currentVoicing, key, tables, settings, captureMany, trail } = useStore();
   const [playing, setPlaying] = useState<{ row: number; step: number } | null>(null);
   const [length, setLength] = useState(4);
 
@@ -32,7 +32,13 @@ export function Progressions() {
   if (!current) return <p className="hint pad">Play a chord to see the progressions songs most often follow from it.</p>;
 
   const play = (i: number) => playSequence(rows[i].voicings, settings.bpm, (step) => setPlaying(step < 0 ? null : { row: i, step }));
-  const use = (i: number) => rows[i].chords.slice(1).forEach((c, j) => commit(c, rows[i].voicings[j + 1]));
+  // Adds the whole progression to the loop (the first chord too, unless the loop already ends on it).
+  const use = (i: number) => {
+    const items = rows[i].chords.map((chord, j) => ({ chord, voicing: rows[i].voicings[j] }));
+    const last = trail[trail.length - 1];
+    const startsOnLast = last && last.chord.root === current.root && last.chord.type === current.type;
+    captureMany(startsOnLast ? items.slice(1) : items);
+  };
 
   return (
     <div className="progs">
@@ -61,7 +67,7 @@ export function Progressions() {
             <div className="prog-side">
               <span className="prog-p" title="Share of songs that continue this way after the first chord">{pct(r.p)}</span>
               <button onClick={() => play(i)} aria-label={`Play ${r.chords.map(chordName).join(' ')}`}>▶ Play</button>
-              <button onClick={() => use(i)}>Use</button>
+              <button onClick={() => use(i)}>Add to loop</button>
             </div>
           </li>
         ))}

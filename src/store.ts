@@ -46,7 +46,7 @@ function write(k: string, v: unknown) {
   try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage full or blocked */ }
 }
 
-/** Replay the key tracker over the trail (deterministic, so undo just works). */
+/** Replay the key tracker over the chords played (deterministic). */
 export function keyOf(trail: TrailItem[], lock: Key | null): Key | null {
   if (lock) return lock;
   if (!trail.length) return null;
@@ -61,10 +61,13 @@ interface State {
   settings: Settings;
   held: number[];
   detected: Detected;
-  /** The chord suggestions are made for: the last committed one. */
+  /** The chord suggestions are made for: the last one played or picked. */
   current: Chord | null;
   currentVoicing: number[];
   key: Key | null;
+  /** Chords played or picked, newest last (key finding and context). Not the loop. */
+  history: TrailItem[];
+  /** The loop: only chords the user captured. */
   trail: TrailItem[];
   suggestions: Suggestion[];
   focus: number;
@@ -79,7 +82,12 @@ interface State {
   setHeld(n: number[]): void;
   /** Held notes settled: name them and, if they make a new chord, add it. */
   settled(n: number[]): void;
+  /** Make a chord the current one (suggestions follow it). Does not touch the loop. */
   commit(chord: Chord, voicing?: number[]): void;
+  /** Add the current chord to the loop. */
+  capture(): void;
+  /** Add chords to the loop and make the last one current. */
+  captureMany(items: TrailItem[]): void;
   setFocus(i: number): void;
   undo(): void;
   clear(): void;
@@ -100,6 +108,7 @@ export const useStore = create<State>((set, get) => ({
   current: null,
   currentVoicing: [],
   key: null,
+  history: [],
   trail: [],
   suggestions: [],
   focus: 0,
@@ -114,7 +123,7 @@ export const useStore = create<State>((set, get) => ({
   set: (k, v) => {
     const settings = { ...get().settings, [k]: v };
     write(SETTINGS_KEY, settings);
-    set({ settings, ...(k === 'keyLock' ? { key: keyOf(get().trail, settings.keyLock) } : {}) });
+    set({ settings, ...(k === 'keyLock' ? { key: keyOf(get().history, settings.keyLock) } : {}) });
     if (k === 'genre' || k === 'keyLock') void get().ensureTables();
     get().recompute();
   },
@@ -136,18 +145,18 @@ export const useStore = create<State>((set, get) => ({
   commit: (chord, voicing) => {
     const s = get();
     const v = voicing ?? defaultVoicing(chord);
-    // Playing the same chord again (any inversion) does not add it to the trail.
+    // Playing the same chord again (any inversion) only updates the hand position.
     if (sameChord(chord, s.current)) {
       set({ currentVoicing: v, detected: { kind: 'chord', chord, name: chordName(chord) } });
       get().recompute();
       return;
     }
-    const trail = [...s.trail, { chord, voicing: v }];
+    const history = [...s.history, { chord, voicing: v }].slice(-40);
     set({
-      trail,
+      history,
       current: chord,
       currentVoicing: v,
-      key: keyOf(trail, s.settings.keyLock),
+      key: keyOf(history, s.settings.keyLock),
       focus: 0,
       detected: { kind: 'chord', chord, name: chordName(chord) },
     });
@@ -155,24 +164,22 @@ export const useStore = create<State>((set, get) => ({
     get().recompute();
   },
 
+  capture: () => {
+    const s = get();
+    if (!s.current) return;
+    set({ trail: [...s.trail, { chord: s.current, voicing: s.currentVoicing.length ? s.currentVoicing : defaultVoicing(s.current) }] });
+  },
+
+  captureMany: (items) => {
+    for (const it of items) get().commit(it.chord, it.voicing);
+    set({ trail: [...get().trail, ...items] });
+  },
+
   setFocus: (focus) => set({ focus }),
 
-  undo: () => {
-    const trail = get().trail.slice(0, -1);
-    const last = trail[trail.length - 1];
-    set({
-      trail,
-      current: last?.chord ?? null,
-      currentVoicing: last?.voicing ?? [],
-      key: keyOf(trail, get().settings.keyLock),
-      detected: last ? { kind: 'chord', chord: last.chord, name: chordName(last.chord) } : { kind: 'none', name: '' },
-    });
-    get().recompute();
-  },
+  undo: () => set({ trail: get().trail.slice(0, -1) }),
 
-  clear: () => {
-    set({ trail: [], current: null, currentVoicing: [], key: keyOf([], get().settings.keyLock), suggestions: [], detected: { kind: 'none', name: '' } });
-  },
+  clear: () => set({ trail: [] }),
 
   save: (name) => {
     const saves = [{ name: name || `Progression ${get().saves.length + 1}`, at: Date.now(), trail: get().trail, bpm: get().settings.bpm }, ...get().saves];
@@ -186,6 +193,7 @@ export const useStore = create<State>((set, get) => ({
     const last = sv.trail[sv.trail.length - 1];
     set({
       trail: sv.trail,
+      history: sv.trail,
       current: last?.chord ?? null,
       currentVoicing: last?.voicing ?? [],
       key: keyOf(sv.trail, get().settings.keyLock),
@@ -221,7 +229,7 @@ export const useStore = create<State>((set, get) => ({
     const mode = s.key.mode;
     const g = s.tables[`${s.settings.genre}-${mode}`] ?? null;
     const all = s.tables[`all-${mode}`] ?? null;
-    const context = s.trail.slice(-3).map((t) => toLabel(t.chord, s.key!));
+    const context = s.history.slice(-3).map((t) => toLabel(t.chord, s.key!));
     const p = genreP(g, all, context);
     const held = s.held.length ? s.held : s.currentVoicing.length ? s.currentVoicing : defaultVoicing(s.current);
     const suggestions = suggest({

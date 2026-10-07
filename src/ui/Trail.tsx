@@ -22,7 +22,7 @@ export function Trail() {
   return (
     <div className="trail">
       <div className="trail-chords" aria-label="Progression">
-        {trail.length === 0 && <span className="hint">Your progression appears here.</span>}
+        {trail.length === 0 && <span className="hint">Your loop is empty. Play a chord and press Capture (or Space) to add it.</span>}
         {trail.map((t, i) => (
           <span key={i} className={'chip' + (playingStep === i ? ' playing' : '')}>{chordName(t.chord)}</span>
         ))}

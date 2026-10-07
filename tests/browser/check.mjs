@@ -53,10 +53,18 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
 
   // 2. rolled chord counts once (F, notes 40 ms apart)
   const trailLen = () => page.evaluate(() => window.__chordpal.store.getState().trail.length);
-  const before = await trailLen();
+  const histLen = () => page.evaluate(() => window.__chordpal.store.getState().history.length);
+  const before = await histLen();
   await chord([65, 69, 72], 40);
   await page.waitForTimeout(250);
-  check(`${vp.name}: rolled chord registers once`, (await trailLen()) === before + 1 && (await name()) === 'F', `trail +${(await trailLen()) - before}, ${await name()}`);
+  check(`${vp.name}: rolled chord registers once`, (await histLen()) === before + 1 && (await name()) === 'F', `+${(await histLen()) - before}, ${await name()}`);
+  check(`${vp.name}: playing does not add to the loop`, (await trailLen()) === 0, `loop ${await trailLen()}`);
+  await page.getByRole('button', { name: /Capture/ }).click();
+  await page.waitForTimeout(100);
+  const cap = await page.evaluate(() => window.__chordpal.store.getState().trail.map((t) => t.chord.root));
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(100);
+  check(`${vp.name}: Capture and Space add the current chord to the loop`, cap.length === 1 && cap[0] === 5 && (await trailLen()) === 2, `loop ${await trailLen()}`);
   await release([65, 69, 72]);
 
   // 3. sustain pedal holds
@@ -70,7 +78,7 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   await send(0xb0, 64, 0);
 
   // 4. key: C F G C Am -> C major, a stray chord does not change it
-  await page.evaluate(() => window.__chordpal.store.getState().clear());
+  await page.evaluate(() => { const st = window.__chordpal.store; st.getState().clear(); st.setState({ history: [], current: null }); });
   for (const c of [[60, 64, 67], [60, 65, 69], [59, 62, 67], [60, 64, 67], [57, 60, 64]]) { await chord(c); await page.waitForTimeout(150); await release(c); }
   const keyName = () => page.evaluate(() => { const k = window.__chordpal.store.getState().key; return k && `${k.tonic}:${k.mode}`; });
   check(`${vp.name}: C F G C Am -> C major`, (await keyName()) === '0:major', await keyName());
@@ -93,11 +101,12 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   check(`${vp.name}: dial 0 -> 100 changes the list`, a.join() !== b.join(), `${a.slice(0, 4)} -> ${b.slice(0, 4)}`);
   await page.locator('.adventure input').fill('25');
 
-  // 7. Use a card -> trail grows, map re-centres
+  // 7. Go on a card -> moves there (map re-centres), loop untouched
   const tl = await trailLen();
+  const target = await page.locator('.cards .cname').first().innerText();
   await page.locator('.cards .use').first().click();
   await page.waitForTimeout(600);
-  check(`${vp.name}: Use adds to the trail`, (await trailLen()) === tl + 1);
+  check(`${vp.name}: Go moves to the chord without adding it to the loop`, (await trailLen()) === tl && (await name()).startsWith(target), `${await name()}`);
 
   // 7b. key pictures on the cards, the progressions tab
   const pics = await page.locator('.cards .minikeys').count();
@@ -110,9 +119,9 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   check(`${vp.name}: progressions tab lists 8 with key pictures`, progs === 8 && first.length === 4 && (await page.locator('.prog .minikeys').count()) === 32, first.join(' '));
   await page.screenshot({ path: `${out}/${vp.name}-3-progressions.png`, fullPage: true });
   const tlp = await trailLen();
-  await page.locator('.prog').first().getByRole('button', { name: 'Use' }).click();
+  await page.locator('.prog').first().getByRole('button', { name: 'Add to loop' }).click();
   await page.waitForTimeout(200);
-  check(`${vp.name}: Use on a progression adds its chords`, (await trailLen()) === tlp + 3);
+  check(`${vp.name}: Add to loop adds the progression`, (await trailLen()) === tlp + 4, `+${(await trailLen()) - tlp}`);
   await page.getByRole('tab', { name: 'Map' }).click();
 
   // 8. library

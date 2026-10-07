@@ -13,6 +13,12 @@ npm run build      # dist/, installable and offline (service worker)
 node tests/browser/check.mjs http://localhost:4173/   # browser checks with a fake MIDI keyboard (after `npx vite preview`)
 ```
 
+## Using it
+
+Play a chord (or tap one in the map, cards or library): ChordPal names it and suggests what comes next.
+Nothing goes into your loop until you press **Capture** (or Space). **Go** on a card moves there without
+saving; **Add to loop** in the Progressions tab adds a whole progression.
+
 ## How it works
 
 | Step | Code |

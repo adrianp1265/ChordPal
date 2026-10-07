@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useStore } from './store';
 import { MidiInput } from './midi/input';
 import { noteOff, noteOn, playChord, startAudio } from './audio/piano';
-import { chordPcs, defaultVoicing, type Chord } from './theory/chord';
+import { chordName, chordPcs, defaultVoicing, type Chord } from './theory/chord';
 import { keyName } from './theory/keys';
 import { prettyLabel, toLabel } from './theory/numerals';
 import { voiceNear } from './theory/voiceLeading';
@@ -30,6 +30,12 @@ export default function App() {
   const s = useStore();
   const [view, setView] = useState<'map' | 'library' | 'progressions'>('map');
   const [loading, setLoading] = useState(false);
+  const [flash, setFlash] = useState(0);
+  const capture = useCallback(() => {
+    if (!useStore.getState().current) return;
+    useStore.getState().capture();
+    setFlash((n) => n + 1);
+  }, []);
 
   const start = async () => {
     setLoading(true);
@@ -72,10 +78,11 @@ export default function App() {
       if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'SELECT') return;
       if (/^[1-8]$/.test(e.key)) focus(Number(e.key) - 1);
       if (e.key === 'Enter') go(useStore.getState().focus);
+      if (e.key === ' ' || e.key === 'c') { e.preventDefault(); capture(); }
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [focus, go]);
+  }, [focus, go, capture]);
 
   if (!s.started) {
     return (
@@ -104,6 +111,10 @@ export default function App() {
           {s.current && s.key && <span className="num">{prettyLabel(toLabel(s.current, s.key))}</span>}
           {s.midi.supported && !s.midi.connected && <span className="warn">No MIDI keyboard connected</span>}
         </div>
+        <button className="capture" onClick={capture} disabled={!s.current} title="Add this chord to your loop (Space)">
+          ● Capture{s.current ? ` ${chordName(s.current)}` : ''}
+        </button>
+        {flash > 0 && <span key={flash} className="captured">Added to loop</span>}
       </section>
 
       <section className="middle">

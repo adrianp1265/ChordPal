@@ -111,3 +111,9 @@ header h1 { font-size: 20px; margin: 0; }
   .prog-side button { flex: 1; }
   .prog-chords { grid-template-columns: repeat(2, 1fr); }
 }
+
+.capture { background: #d1495b; color: #fff; border: 0; border-radius: 22px; padding: 8px 18px; font-weight: 700; font-size: 16px; align-self: center; }
+.capture:disabled { background: var(--line); color: var(--muted); }
+.captured { color: #3bb273; font-weight: 600; animation: fadeout 1.6s forwards; align-self: center; }
+@keyframes fadeout { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+.now { align-items: center; }

@@ -24,7 +24,7 @@ export function Cards({ suggestions, focus, onFocus, onUse }: Props) {
               </span>
               <span className="common" title="Share of songs that go here next · notes your hand keeps">{pct(s.p)} of songs · {s.shared} kept</span>
             </button>
-            <button className="use" onClick={() => onUse(i)}>Use</button>
+            <button className="use" onClick={() => onUse(i)} title="Play it and see what comes next (does not add it to the loop)">Go</button>
           </li>
         );
       })}
