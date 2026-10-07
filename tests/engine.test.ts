@@ -158,3 +158,17 @@ describe('labels', () => {
     expect(prettyLabel('7m7b5')).toBe('7m7♭5');
   });
 });
+
+import { topProgressions, noRepeats } from '../src/engine/progressions';
+describe('progressions', () => {
+  it('pop, after C: 1-5-6m-4 (C G Am F) is among the most common, no repeats', () => {
+    const cMaj = { tonic: 0, mode: 'major' as const };
+    const rows = topProgressions(C(0), cMaj, table('pop-major'), table('all-major'));
+    console.log(rows.map((r) => `${r.chords.map(chordName).join(' ')}  ${(r.p * 100).toFixed(1)}%`).join('\n'));
+    expect(rows.length).toBe(8);
+    expect(rows[0].labels.join(' ')).toBe('1 5 6m 4');
+    expect(rows.every((r) => new Set(r.labels).size >= 3)).toBe(true);
+    expect(rows.every(noRepeats)).toBe(true);
+    expect(rows[0].p).toBeGreaterThanOrEqual(rows[7].p);
+  });
+});

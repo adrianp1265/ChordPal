@@ -81,6 +81,7 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   const cards = await page.locator('.cards li').count();
   const ghosts = await page.locator('.keyboard rect[style*="fill"]').count();
   check(`${vp.name}: 8 suggestion cards and ghost keys`, cards === 8 && ghosts > 0, `${cards} cards, ${ghosts} ghost keys`);
+  await page.waitForTimeout(700); // let the map's transitions finish
   await page.screenshot({ path: `${out}/${vp.name}-1-map.png`, fullPage: true });
 
   // 6. Adventure dial and genre change the list
@@ -97,6 +98,22 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   await page.locator('.cards .use').first().click();
   await page.waitForTimeout(600);
   check(`${vp.name}: Use adds to the trail`, (await trailLen()) === tl + 1);
+
+  // 7b. key pictures on the cards, the progressions tab
+  const pics = await page.locator('.cards .minikeys').count();
+  const lit = await page.locator('.cards li').first().locator('.mk-w[style], .mk-b[style]').count();
+  check(`${vp.name}: every card shows its keys`, pics === 8 && lit >= 3, `${pics} pictures, ${lit} keys lit on the first`);
+  await page.getByRole('tab', { name: 'Progressions' }).click();
+  await page.waitForSelector('.prog');
+  const progs = await page.locator('.prog').count();
+  const first = await page.locator('.prog').first().locator('.pc-name').allInnerTexts();
+  check(`${vp.name}: progressions tab lists 8 with key pictures`, progs === 8 && first.length === 4 && (await page.locator('.prog .minikeys').count()) === 32, first.join(' '));
+  await page.screenshot({ path: `${out}/${vp.name}-3-progressions.png`, fullPage: true });
+  const tlp = await trailLen();
+  await page.locator('.prog').first().getByRole('button', { name: 'Use' }).click();
+  await page.waitForTimeout(200);
+  check(`${vp.name}: Use on a progression adds its chords`, (await trailLen()) === tlp + 3);
+  await page.getByRole('tab', { name: 'Map' }).click();
 
   // 8. library
   await page.getByRole('tab', { name: 'Library' }).click();

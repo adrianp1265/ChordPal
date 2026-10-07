@@ -69,3 +69,22 @@ export function stopLoop() {
   transport.stop();
   transport.position = 0;
 }
+
+let seqTimers: ReturnType<typeof setTimeout>[] = [];
+
+/** Play chords once, two beats each. `onStep` gets the index playing, then -1 at the end. */
+export function playSequence(chords: number[][], bpm: number, onStep: (i: number) => void) {
+  stopSequence();
+  const step = (60 / bpm) * 2;
+  const t0 = Tone.now() + 0.05;
+  chords.forEach((c, i) => {
+    playChord(c, step * 0.95, t0 + i * step);
+    seqTimers.push(setTimeout(() => onStep(i), i * step * 1000));
+  });
+  seqTimers.push(setTimeout(() => onStep(-1), chords.length * step * 1000));
+}
+
+export function stopSequence() {
+  seqTimers.forEach(clearTimeout);
+  seqTimers = [];
+}
