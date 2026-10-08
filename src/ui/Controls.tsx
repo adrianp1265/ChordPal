@@ -6,9 +6,9 @@ import { useStore } from '../store';
 
 const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
 
-interface Props { onSelectMidi(id: string): void }
+interface Props { open: boolean; onSelectMidi(id: string): void }
 
-export function Controls({ onSelectMidi }: Props) {
+export function Controls({ open, onSelectMidi }: Props) {
   const { settings, set, key, index, midi } = useStore();
   const lock = settings.keyLock;
   const source = index?.genres[settings.genre]?.source ?? '';
@@ -21,8 +21,8 @@ export function Controls({ onSelectMidi }: Props) {
   };
 
   return (
-    <div className="controls">
-      <label>
+    <div className={'controls' + (open ? ' open' : '')}>
+      <label title="Auto follows what you play. Pick one to keep the numbers fixed.">
         Key
         <select value={lock ? `${lock.tonic}:${lock.mode}` : 'auto'} onChange={(e) => setKey(e.target.value)}>
           <option value="auto">Auto{!lock && key ? ` (${keyName(key)})` : ''}</option>
@@ -32,20 +32,20 @@ export function Controls({ onSelectMidi }: Props) {
           )}
         </select>
       </label>
-      <label>
+      <label title="Which songs the suggestions are learned from">
         Genre
         <select value={settings.genre} onChange={(e) => set('genre', e.target.value as Genre)}>
           {GENRES.map((g) => <option key={g} value={g}>{cap(g)}</option>)}
         </select>
         {source.includes('starter') && <span className="tag" title="Starter progressions until the Chordonomicon tables are built">starter data</span>}
       </label>
-      <label>
+      <label title="Nudges suggestions toward chords with this feel">
         Mood
         <select value={settings.mood} onChange={(e) => set('mood', e.target.value as Mood)}>
           {MOODS.map((m) => <option key={m} value={m}>{cap(m)}</option>)}
         </select>
       </label>
-      <label className="adventure">
+      <label className="adventure" title="Low: the moves most songs make. High: rarer, more surprising ones.">
         Adventure <output>{settings.adventure}</output>
         <input type="range" min={0} max={100} value={settings.adventure} onChange={(e) => set('adventure', Number(e.target.value))} />
       </label>
@@ -60,7 +60,7 @@ export function Controls({ onSelectMidi }: Props) {
           <span className="tag">not available in this browser</span>
         )}
       </label>
-      <label className="check">
+      <label className="check" title="Play the piano sound when you press keys on your MIDI keyboard">
         <input type="checkbox" checked={settings.monitor} onChange={(e) => set('monitor', e.target.checked)} />
         Monitor
       </label>

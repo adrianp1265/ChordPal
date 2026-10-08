@@ -30,7 +30,7 @@ export function Progressions() {
       <ol>
         {(moreFamous ? famous : famous.slice(0, 5)).map((p) => (
           <ProgressionRow key={p.standard.id} chords={p.chords} keyNow={p.key} loop={p.standard.loop} startVoicing={currentVoicing}
-            title={p.standard.name} subtitle={`${p.standard.aka} · in ${keyName(p.key)}`}
+            title={p.standard.name} subtitle={[p.standard.aka, `in ${keyName(p.key)}`].filter(Boolean).join(' · ')}
             badge={p.share !== null ? `${pct(p.share)} of ${genre}songs` : undefined}
             badgeTitle="Share of songs that contain this progression (any key)"
             footer={<Examples st={p.standard} />} />

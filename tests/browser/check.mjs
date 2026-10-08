@@ -95,11 +95,17 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   // 6. Adventure dial and genre change the list
   const list = () => page.locator('.cards .cname').allInnerTexts();
   const a = await list();
+  // On a phone the settings are tucked behind a button.
+  const toggle = page.locator('.settings-toggle');
+  const tucked = await toggle.isVisible();
+  if (tucked) await toggle.click();
+  check(`${vp.name}: settings reachable`, await page.locator('.adventure input').isVisible());
   await page.locator('.adventure input').fill('100');
   await page.waitForTimeout(200);
   const b = await list();
   check(`${vp.name}: dial 0 -> 100 changes the list`, a.join() !== b.join(), `${a.slice(0, 4)} -> ${b.slice(0, 4)}`);
   await page.locator('.adventure input').fill('25');
+  if (tucked) await toggle.click();
 
   // 7. Go on a card -> moves there (map re-centres), loop untouched
   const tl = await trailLen();
@@ -163,7 +169,7 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   await page.getByRole('tab', { name: 'Map' }).click();
 
   // 8. library
-  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('tab', { name: 'All chords' }).click();
   const inKey = await page.locator('.lib-cell.in-key').count();
   await page.locator('.lib-cell', { hasText: 'Am7' }).first().click();
   await page.waitForTimeout(200);

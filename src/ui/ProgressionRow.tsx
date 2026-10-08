@@ -7,7 +7,6 @@ import { voiceNear } from '../theory/voiceLeading';
 import { substitutes } from '../engine/subs';
 import { playChord, playSequence } from '../audio/piano';
 import { useStore } from '../store';
-import { SLOT_COLORS } from './colors';
 import { MiniKeys } from './MiniKeys';
 
 
@@ -67,7 +66,7 @@ function Row({ chords: original, keyNow, loop = true, title, subtitle, badge, ba
     <li className="prog">
       {(title || badge) && (
         <div className="prog-title">
-          <span>{title && <b>{title}</b>} {subtitle && <span className="muted">{subtitle}</span>}</span>
+          <span>{title && <b>{title}</b>}{title && subtitle && ' '}{subtitle && <span className="muted">{subtitle}</span>}</span>
           {badge && <span className="prog-p" title={badgeTitle}>{badge}</span>}
         </div>
       )}
@@ -77,7 +76,7 @@ function Row({ chords: original, keyNow, loop = true, title, subtitle, badge, ba
             onClick={() => { playChord(voicings[j]); setSwapAt(swapAt === j ? null : j); }} title="Hear it and see what else fits here">
             <span className="pc-name">{chordName(c)}</span>
             <span className="pc-num">{prettyLabel(toLabel(c, keyNow))}</span>
-            <MiniKeys notes={voicings[j]} color={SLOT_COLORS[j % SLOT_COLORS.length]} label={false} />
+            <MiniKeys notes={voicings[j]} color="var(--accent)" label={false} />
           </button>
         ))}
       </div>

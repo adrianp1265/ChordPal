@@ -2,7 +2,7 @@
   {
     "id": "pop",
     "name": "Pop loop",
-    "aka": "Axis / I–V–vi–IV",
+    "aka": "Axis",
     "mode": "major",
     "labels": [
       "1",
@@ -38,7 +38,7 @@
   {
     "id": "fifties",
     "name": "50s progression",
-    "aka": "Doo-wop / I–vi–IV–V",
+    "aka": "Doo-wop",
     "mode": "major",
     "labels": [
       "1",
@@ -69,7 +69,7 @@
   {
     "id": "three",
     "name": "Three-chord",
-    "aka": "I–IV–V",
+    "aka": "",
     "mode": "major",
     "labels": [
       "1",
@@ -99,7 +99,7 @@
   {
     "id": "blues",
     "name": "12-bar blues",
-    "aka": "I–IV–I–V–IV–I",
+    "aka": "",
     "mode": "major",
     "labels": [
       "1",
@@ -196,7 +196,7 @@
   {
     "id": "circle",
     "name": "Circle progression",
-    "aka": "vi–ii–V–I",
+    "aka": "",
     "mode": "major",
     "labels": [
       "6m",
@@ -222,7 +222,7 @@
   {
     "id": "bluemoon",
     "name": "Blue Moon",
-    "aka": "I–vi–ii–V",
+    "aka": "",
     "mode": "major",
     "labels": [
       "1",
@@ -243,7 +243,7 @@
   {
     "id": "andalusian",
     "name": "Andalusian cadence",
-    "aka": "i–VII–VI–V",
+    "aka": "",
     "mode": "minor",
     "labels": [
       "1m",
@@ -269,7 +269,7 @@
   {
     "id": "minorpop",
     "name": "Minor rock loop",
-    "aka": "i–VII–VI–VII",
+    "aka": "",
     "mode": "minor",
     "labels": [
       "1m",
@@ -295,7 +295,7 @@
   {
     "id": "mixo",
     "name": "Rock ♭7",
-    "aka": "I–♭VII–IV",
+    "aka": "",
     "mode": "major",
     "labels": [
       "1",
@@ -320,7 +320,7 @@
   {
     "id": "creep",
     "name": "Creep",
-    "aka": "I–III–IV–iv",
+    "aka": "",
     "mode": "major",
     "labels": [
       "1",

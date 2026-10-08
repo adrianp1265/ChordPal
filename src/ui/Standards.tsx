@@ -11,8 +11,8 @@ import { pct } from './format';
 export function Examples({ st }: { st: Standard }) {
   return (
     <p className="examples">
-      {st.about}{' '}
-      <span className="muted">
+      {st.about}
+      <span className="muted heard">
         Heard in: {st.examples.map((e) => `${e.song} (${e.artist})${e.from && e.from !== st.labels[0] ? `, starting on the ${prettyLabel(e.from)}` : ''}`).join(' · ')}
       </span>
     </p>
@@ -46,7 +46,7 @@ export function Standards() {
       <ol>
         {rows.map((p) => (
           <ProgressionRow key={p.standard.id + p.key.tonic} chords={p.chords} keyNow={p.key} loop={p.standard.loop}
-            title={p.standard.name} subtitle={`${p.standard.aka} · ${keyName(p.key)}`}
+            title={p.standard.name} subtitle={[p.standard.aka, keyName(p.key)].filter(Boolean).join(' · ')}
             badge={p.share !== null ? `${pct(p.share)} of ${genre}songs` : undefined}
             badgeTitle="Share of songs that contain this progression (any key)"
             footer={<Examples st={p.standard} />} />

@@ -42,7 +42,7 @@ export function MapView({ current, keyNow, suggestions, focus, onFocus, onGo }: 
       };
     });
     const center = current
-      ? [{ id: chordId(current), name: chordName(current), sub: keyNow ? prettyLabel(toLabel(current, keyNow)) : '', x: CX, y: CY, r: 34, color: '#222', i: -1 }]
+      ? [{ id: chordId(current), name: chordName(current), sub: keyNow ? prettyLabel(toLabel(current, keyNow)) : '', x: CX, y: CY, r: 34, color: '', i: -1 }]
       : [];
 
     svg.select('g.links').selectAll<SVGLineElement, Node>('line').data(nodes, (d) => d.id)
@@ -77,10 +77,10 @@ export function MapView({ current, keyNow, suggestions, focus, onFocus, onGo }: 
     g.classed('center', (d) => d.i < 0).classed('focused', (d) => d.i === focus)
       .on('click', (_, d) => { if (d.i >= 0) onFocus(d.i); })
       .on('dblclick', (_, d) => { if (d.i >= 0) onGo(d.i); });
-    g.select('circle').attr('fill', (d) => (d.i < 0 ? '#222' : d.color)).attr('fill-opacity', (d) => (d.i < 0 ? 1 : d.i === focus ? 0.95 : 0.7))
+    g.select('circle').attr('fill', (d) => (d.i < 0 ? null : d.color)).attr('fill-opacity', (d) => (d.i < 0 ? 1 : d.i === focus ? 0.95 : 0.7))
       .transition().duration(450).ease(d3.easeCubicOut).attr('r', (d) => d.r);
     g.select('text.n1').text((d) => d.name).attr('dy', (d) => (d.sub ? -2 : 4)).style('font-size', (d) => `${Math.max(10, Math.min(16, d.r * 0.55))}px`);
-    g.select('text.n2').text((d) => d.sub).attr('dy', 12).style('font-size', '9px');
+    g.select('text.n2').text((d) => d.sub).attr('dy', 12).style('font-size', (d) => `${Math.min(9, (1.7 * d.r) / Math.max(d.sub.length, 1) / 0.6)}px`);
     g.transition().duration(450).ease(d3.easeCubicOut).style('opacity', 1).attr('transform', (d) => `translate(${d.x},${d.y})`);
     last.current = new Map(all.map((d) => [d.id, { x: d.x, y: d.y }]));
   }, [current, keyNow, suggestions, focus, onFocus, onGo]);
@@ -92,7 +92,7 @@ export function MapView({ current, keyNow, suggestions, focus, onFocus, onGo }: 
         <g className="links" />
         <g className="nodes" />
       </svg>
-      {!current && <p className="hint">Play a chord, or pick one from the library.</p>}
+      {!current && <p className="hint">Play a chord, or pick one from All chords.</p>}
       {f && (
         <button className="go" style={{ background: SLOT_COLORS[focus % SLOT_COLORS.length] }} onClick={() => onGo(focus)}>
           Go to {chordName(f.chord)}
