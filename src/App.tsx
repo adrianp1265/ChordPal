@@ -13,6 +13,7 @@ import { Library } from './ui/Library';
 import { Keyboard } from './ui/Keyboard';
 import { Trail } from './ui/Trail';
 import { Progressions } from './ui/Progressions';
+import { Standards } from './ui/Standards';
 import { SLOT_COLORS } from './ui/colors';
 
 const midi = new MidiInput({
@@ -28,7 +29,7 @@ const midi = new MidiInput({
 
 export default function App() {
   const s = useStore();
-  const [view, setView] = useState<'map' | 'library' | 'progressions'>('map');
+  const [view, setView] = useState<'map' | 'library' | 'progressions' | 'standards'>('map');
   const [loading, setLoading] = useState(false);
   const [flash, setFlash] = useState(0);
   const capture = useCallback(() => {
@@ -122,10 +123,12 @@ export default function App() {
           <div className="tabs" role="tablist">
             <button role="tab" aria-selected={view === 'map'} onClick={() => setView('map')}>Map</button>
             <button role="tab" aria-selected={view === 'progressions'} onClick={() => setView('progressions')}>Progressions</button>
+            <button role="tab" aria-selected={view === 'standards'} onClick={() => setView('standards')}>Standards</button>
             <button role="tab" aria-selected={view === 'library'} onClick={() => setView('library')}>Library</button>
           </div>
           {view === 'map' && <MapView current={s.current} keyNow={s.key} suggestions={s.suggestions} focus={s.focus} onFocus={focus} onGo={go} />}
           {view === 'progressions' && <Progressions />}
+          {view === 'standards' && <Standards />}
           {view === 'library' && <Library keyNow={s.key} current={s.current} onPick={pick} />}
         </div>
         <Cards suggestions={s.suggestions} focus={s.focus} onFocus={focus} onUse={go} />

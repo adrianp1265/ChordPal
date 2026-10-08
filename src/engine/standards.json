@@ -1,0 +1,341 @@
+[
+  {
+    "id": "pop",
+    "name": "Pop loop",
+    "aka": "Axis / I–V–vi–IV",
+    "mode": "major",
+    "labels": [
+      "1",
+      "5",
+      "6m",
+      "4"
+    ],
+    "loop": true,
+    "about": "The most common loop in pop. Starting it on the 6 makes it sound sadder.",
+    "examples": [
+      {
+        "song": "Let It Be",
+        "artist": "The Beatles",
+        "from": "1"
+      },
+      {
+        "song": "Someone Like You",
+        "artist": "Adele",
+        "from": "1"
+      },
+      {
+        "song": "Zombie",
+        "artist": "The Cranberries",
+        "from": "6m"
+      },
+      {
+        "song": "Despacito",
+        "artist": "Luis Fonsi",
+        "from": "6m"
+      }
+    ]
+  },
+  {
+    "id": "fifties",
+    "name": "50s progression",
+    "aka": "Doo-wop / I–vi–IV–V",
+    "mode": "major",
+    "labels": [
+      "1",
+      "6m",
+      "4",
+      "5"
+    ],
+    "loop": true,
+    "about": "The classic ballad loop of the 1950s, still everywhere.",
+    "examples": [
+      {
+        "song": "Stand By Me",
+        "artist": "Ben E. King",
+        "from": "1"
+      },
+      {
+        "song": "Every Breath You Take",
+        "artist": "The Police",
+        "from": "1"
+      },
+      {
+        "song": "Earth Angel",
+        "artist": "The Penguins",
+        "from": "1"
+      }
+    ]
+  },
+  {
+    "id": "three",
+    "name": "Three-chord",
+    "aka": "I–IV–V",
+    "mode": "major",
+    "labels": [
+      "1",
+      "4",
+      "5"
+    ],
+    "loop": true,
+    "about": "Home, away, tension. The backbone of rock, folk and country.",
+    "examples": [
+      {
+        "song": "Twist and Shout",
+        "artist": "The Isley Brothers / The Beatles",
+        "from": "1"
+      },
+      {
+        "song": "La Bamba",
+        "artist": "Ritchie Valens",
+        "from": "1"
+      },
+      {
+        "song": "Wild Thing",
+        "artist": "The Troggs",
+        "from": "1"
+      }
+    ]
+  },
+  {
+    "id": "blues",
+    "name": "12-bar blues",
+    "aka": "I–IV–I–V–IV–I",
+    "mode": "major",
+    "labels": [
+      "1",
+      "4",
+      "1",
+      "5",
+      "4",
+      "1"
+    ],
+    "loop": false,
+    "bars": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "4",
+      "4",
+      "1",
+      "1",
+      "5",
+      "4",
+      "1",
+      "5"
+    ],
+    "about": "Twelve bars: four of the 1, two of the 4, two of the 1, then 5, 4, 1 (and 5 to go round again).",
+    "examples": [
+      {
+        "song": "Johnny B. Goode",
+        "artist": "Chuck Berry"
+      },
+      {
+        "song": "Hound Dog",
+        "artist": "Elvis Presley"
+      },
+      {
+        "song": "Pride and Joy",
+        "artist": "Stevie Ray Vaughan"
+      }
+    ]
+  },
+  {
+    "id": "pachelbel",
+    "name": "Pachelbel",
+    "aka": "Canon progression",
+    "mode": "major",
+    "labels": [
+      "1",
+      "5",
+      "6m",
+      "3m",
+      "4",
+      "1",
+      "4",
+      "5"
+    ],
+    "loop": true,
+    "about": "Eight chords that walk down and back up. Countless songs borrow it.",
+    "examples": [
+      {
+        "song": "Canon in D",
+        "artist": "Johann Pachelbel",
+        "from": "1"
+      },
+      {
+        "song": "Basket Case",
+        "artist": "Green Day",
+        "from": "1"
+      }
+    ]
+  },
+  {
+    "id": "twofive",
+    "name": "ii–V–I",
+    "aka": "Jazz cadence",
+    "mode": "major",
+    "labels": [
+      "2m7",
+      "57",
+      "1maj7"
+    ],
+    "loop": false,
+    "about": "The basic move of jazz: away, tension, home.",
+    "examples": [
+      {
+        "song": "Autumn Leaves",
+        "artist": "Joseph Kosma"
+      },
+      {
+        "song": "Fly Me to the Moon",
+        "artist": "Bart Howard"
+      }
+    ]
+  },
+  {
+    "id": "circle",
+    "name": "Circle progression",
+    "aka": "vi–ii–V–I",
+    "mode": "major",
+    "labels": [
+      "6m",
+      "2m",
+      "5",
+      "1"
+    ],
+    "loop": true,
+    "about": "Each chord falls a fifth to the next, landing on home.",
+    "examples": [
+      {
+        "song": "Fly Me to the Moon",
+        "artist": "Bart Howard",
+        "from": "6m"
+      },
+      {
+        "song": "I Will Survive",
+        "artist": "Gloria Gaynor",
+        "from": "6m"
+      }
+    ]
+  },
+  {
+    "id": "bluemoon",
+    "name": "Blue Moon",
+    "aka": "I–vi–ii–V",
+    "mode": "major",
+    "labels": [
+      "1",
+      "6m",
+      "2m",
+      "5"
+    ],
+    "loop": true,
+    "about": "The 50s loop with the 4 swapped for the 2m. Jazzier, same shape.",
+    "examples": [
+      {
+        "song": "Blue Moon",
+        "artist": "Rodgers & Hart",
+        "from": "1"
+      }
+    ]
+  },
+  {
+    "id": "andalusian",
+    "name": "Andalusian cadence",
+    "aka": "i–VII–VI–V",
+    "mode": "minor",
+    "labels": [
+      "1m",
+      "b7",
+      "b6",
+      "5"
+    ],
+    "loop": true,
+    "about": "Steps down from minor home to a strong major 5. Dramatic, Spanish flavour.",
+    "examples": [
+      {
+        "song": "Hit the Road Jack",
+        "artist": "Ray Charles",
+        "from": "1m"
+      },
+      {
+        "song": "Runaway",
+        "artist": "Del Shannon",
+        "from": "1m"
+      }
+    ]
+  },
+  {
+    "id": "minorpop",
+    "name": "Minor rock loop",
+    "aka": "i–VII–VI–VII",
+    "mode": "minor",
+    "labels": [
+      "1m",
+      "b7",
+      "b6",
+      "b7"
+    ],
+    "loop": true,
+    "about": "Minor home, steps down through two major chords and back up. Epic, anthemic.",
+    "examples": [
+      {
+        "song": "All Along the Watchtower",
+        "artist": "Bob Dylan / Jimi Hendrix",
+        "from": "1m"
+      },
+      {
+        "song": "Stairway to Heaven (outro)",
+        "artist": "Led Zeppelin",
+        "from": "1m"
+      }
+    ]
+  },
+  {
+    "id": "mixo",
+    "name": "Rock ♭7",
+    "aka": "I–♭VII–IV",
+    "mode": "major",
+    "labels": [
+      "1",
+      "b7",
+      "4"
+    ],
+    "loop": true,
+    "about": "Borrows the ♭7 for a classic-rock swagger.",
+    "examples": [
+      {
+        "song": "Sweet Child O' Mine",
+        "artist": "Guns N' Roses",
+        "from": "1"
+      },
+      {
+        "song": "Sympathy for the Devil",
+        "artist": "The Rolling Stones",
+        "from": "1"
+      }
+    ]
+  },
+  {
+    "id": "creep",
+    "name": "Creep",
+    "aka": "I–III–IV–iv",
+    "mode": "major",
+    "labels": [
+      "1",
+      "3",
+      "4",
+      "4m"
+    ],
+    "loop": true,
+    "about": "A major 3 and a minor 4 borrowed from outside the key. Bittersweet.",
+    "examples": [
+      {
+        "song": "Creep",
+        "artist": "Radiohead",
+        "from": "1"
+      }
+    ]
+  }
+]

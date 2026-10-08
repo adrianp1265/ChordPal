@@ -114,14 +114,52 @@ for (const vp of [{ name: 'laptop', width: 1280, height: 860 }, { name: 'phone',
   check(`${vp.name}: every card shows its keys`, pics === 8 && lit >= 3, `${pics} pictures, ${lit} keys lit on the first`);
   await page.getByRole('tab', { name: 'Progressions' }).click();
   await page.waitForSelector('.prog');
-  const progs = await page.locator('.prog').count();
-  const first = await page.locator('.prog').first().locator('.pc-name').allInnerTexts();
-  check(`${vp.name}: progressions tab lists 8 with key pictures`, progs === 8 && first.length === 4 && (await page.locator('.prog .minikeys').count()) === 32, first.join(' '));
+  await page.waitForFunction(() => document.querySelectorAll('.progs > ol')[1]?.children.length > 0, null, { timeout: 10000 });
+  const lists = page.locator('.progs > ol');
+  const famous = await lists.nth(0).locator('.prog').count();
+  const counted = await lists.nth(1).locator('.prog').count();
+  const famousTitles = await lists.nth(0).locator('.prog-title b').allInnerTexts();
+  const firstCounted = await lists.nth(1).locator('.prog').first().locator('.pc-name').allInnerTexts();
+  check(`${vp.name}: progressions tab: famous ones and counted runs`, famous === 5 && counted === 5 && firstCounted.length === 4,
+    `${famous} famous (${famousTitles.slice(0, 3).join(', ')}), ${counted} counted, first ${firstCounted.join(' ')}`);
   await page.screenshot({ path: `${out}/${vp.name}-3-progressions.png`, fullPage: true });
+
+  // swap a chord inside a progression
+  const row = lists.nth(0).locator('.prog').first();
+  const before2 = await row.locator('.pc-name').nth(1).innerText();
+  await row.locator('.prog-chord').nth(1).click();
+  await page.waitForSelector('.prog .swap button');
+  const options = await row.locator('.swap-list button').count();
+  await row.locator('.swap-list button').first().click();
+  const after2 = await row.locator('.pc-name').nth(1).innerText();
+  const marked = await row.locator('.prog-chord').nth(1).evaluate((el) => el.classList.contains('swapped'));
+  check(`${vp.name}: swap a chord in a progression`, options >= 3 && after2 !== before2 && marked, `${options} options, ${before2} -> ${after2}`);
+  await page.screenshot({ path: `${out}/${vp.name}-4-swap.png`, fullPage: true });
   const tlp = await trailLen();
-  await page.locator('.prog').first().getByRole('button', { name: 'Add to loop' }).click();
+  await row.getByRole('button', { name: 'Add to loop' }).click();
   await page.waitForTimeout(200);
-  check(`${vp.name}: Add to loop adds the progression`, (await trailLen()) === tlp + 4, `+${(await trailLen()) - tlp}`);
+  check(`${vp.name}: Add to loop adds the (swapped) progression`, (await trailLen()) >= tlp + 2, `+${(await trailLen()) - tlp}`);
+
+  // swap a chord in the loop
+  const loopBefore = await page.evaluate(() => window.__chordpal.store.getState().trail.map((t) => t.chord.root + t.chord.type).join());
+  await page.locator('.trail-chords .chip').first().click();
+  await page.waitForSelector('.trail .swap button');
+  await page.locator('.trail .swap-list button').first().click();
+  const loopAfter = await page.evaluate(() => window.__chordpal.store.getState().trail.map((t) => t.chord.root + t.chord.type).join());
+  check(`${vp.name}: swap a chord in the loop`, loopBefore !== loopAfter && loopBefore.split(',').length === loopAfter.split(',').length);
+
+  // standards library
+  await page.getByRole('tab', { name: 'Standards' }).click();
+  await page.waitForSelector('.prog-title');
+  const stdCount = await page.locator('.prog').count();
+  await page.locator('.progs-head select').selectOption('2');
+  await page.waitForTimeout(200);
+  const popRow = page.locator('.prog', { hasText: 'Pop loop' });
+  const popChords = await popRow.locator('.pc-name').allInnerTexts();
+  const heard = await popRow.locator('.examples').innerText();
+  check(`${vp.name}: standards library in D: pop loop D A Bm G, with examples`, stdCount === 12 && popChords.join(' ') === 'D A Bm G' && heard.includes('Let It Be'),
+    `${stdCount} standards, ${popChords.join(' ')}`);
+  await page.screenshot({ path: `${out}/${vp.name}-5-standards.png`, fullPage: true });
   await page.getByRole('tab', { name: 'Map' }).click();
 
   // 8. library

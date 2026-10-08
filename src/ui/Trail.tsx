@@ -1,11 +1,22 @@
 import { useState } from 'react';
-import { chordName } from '../theory/chord';
+import { chordName, chordPcs } from '../theory/chord';
+import { prettyLabel } from '../theory/numerals';
+import { voiceNear } from '../theory/voiceLeading';
+import { substitutes } from '../engine/subs';
+import { playChord } from '../audio/piano';
+import { pct } from './format';
 import { useStore } from '../store';
 import { playLoop, stopLoop } from '../audio/piano';
 
 export function Trail() {
-  const { trail, settings, set, undo, clear, save, saves, load, removeSave, playingStep, setPlaying } = useStore();
+  const { trail, settings, set, undo, clear, save, saves, load, removeSave, playingStep, setPlaying, key, tables, replaceTrail } = useStore();
   const [playing, setPlayingFlag] = useState(false);
+  const [swapAt, setSwapAt] = useState<number | null>(null);
+  const n = trail.length;
+  const subs = swapAt !== null && swapAt < n && key
+    ? substitutes(trail[(swapAt - 1 + n) % n].chord, trail[swapAt].chord, trail[(swapAt + 1) % n].chord, key,
+        tables[`${settings.genre}-${key.mode}`] ?? null, tables[`all-${key.mode}`] ?? null)
+    : [];
   const [showSaves, setShowSaves] = useState(false);
 
   const toggle = () => {
@@ -23,17 +34,38 @@ export function Trail() {
     <div className="trail">
       <div className="trail-chords" aria-label="Progression">
         {trail.length === 0 && <span className="hint">Your loop is empty. Play a chord and press Capture (or Space) to add it.</span>}
+        {trail.length > 0 && <span className="muted small">Tap a chord to swap it.</span>}
         {trail.map((t, i) => (
-          <span key={i} className={'chip' + (playingStep === i ? ' playing' : '')}>{chordName(t.chord)}</span>
+          <button key={i} className={'chip' + (playingStep === i ? ' playing' : '') + (swapAt === i ? ' swapping' : '')}
+            onClick={() => { playChord(t.voicing); setSwapAt(swapAt === i ? null : i); }} title="Hear it and swap it">
+            {chordName(t.chord)}
+          </button>
         ))}
       </div>
+      {swapAt !== null && swapAt < n && (
+        <div className="swap">
+          <span className="muted">Instead of {chordName(trail[swapAt].chord)} here, songs often use:</span>
+          <div className="swap-list">
+            {subs.length === 0 && <span className="muted">Nothing common here.</span>}
+            {subs.map((s) => (
+              <button key={s.label} onClick={() => {
+                const voicing = voiceNear(trail[swapAt].voicing, chordPcs(s.chord));
+                replaceTrail(swapAt, { chord: s.chord, voicing });
+                playChord(voicing);
+              }}>
+                <b>{chordName(s.chord)}</b> <span className="muted">{prettyLabel(s.label)} · {pct(s.p)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="trail-actions">
         <button onClick={toggle} disabled={!trail.length && !playing}>{playing ? 'Stop' : 'Loop'}</button>
         <label className="bpm">
           <input type="number" min={40} max={220} value={settings.bpm} onChange={(e) => set('bpm', Math.max(40, Math.min(220, Number(e.target.value) || 90)))} /> bpm
         </label>
-        <button onClick={undo} disabled={!trail.length}>Undo</button>
-        <button onClick={() => { stopLoop(); setPlayingFlag(false); setPlaying(null); clear(); }} disabled={!trail.length}>Clear</button>
+        <button onClick={() => { setSwapAt(null); undo(); }} disabled={!trail.length}>Undo</button>
+        <button onClick={() => { stopLoop(); setPlayingFlag(false); setPlaying(null); setSwapAt(null); clear(); }} disabled={!trail.length}>Clear</button>
         <button onClick={() => { const n = prompt('Name this progression', ''); if (n !== null) save(n); }} disabled={!trail.length}>Save</button>
         <button onClick={() => setShowSaves((v) => !v)}>Saved ({saves.length})</button>
       </div>

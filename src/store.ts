@@ -88,6 +88,8 @@ interface State {
   capture(): void;
   /** Add chords to the loop and make the last one current. */
   captureMany(items: TrailItem[]): void;
+  /** Swap one chord of the loop. */
+  replaceTrail(i: number, item: TrailItem): void;
   setFocus(i: number): void;
   undo(): void;
   clear(): void;
@@ -174,6 +176,8 @@ export const useStore = create<State>((set, get) => ({
     for (const it of items) get().commit(it.chord, it.voicing);
     set({ trail: [...get().trail, ...items] });
   },
+
+  replaceTrail: (i, item) => set({ trail: get().trail.map((t, j) => (j === i ? item : t)) }),
 
   setFocus: (focus) => set({ focus }),
 

@@ -17,7 +17,13 @@ node tests/browser/check.mjs http://localhost:4173/   # browser checks with a fa
 
 Play a chord (or tap one in the map, cards or library): ChordPal names it and suggests what comes next.
 Nothing goes into your loop until you press **Capture** (or Space). **Go** on a card moves there without
-saving; **Add to loop** in the Progressions tab adds a whole progression.
+saving; **Add to loop** adds a whole progression. Tap any chord in a progression (or in your loop) to see what
+else commonly fits there and swap it.
+
+- **Progressions**: the famous progressions your chord can start (your chord's number decides the key), then
+  the 3- and 4-chord runs real songs play most often from it, counted per song.
+- **Standards**: 12 named progressions (pop loop, 50s, I–IV–V, 12-bar blues, ii–V–I, Andalusian...) in any key,
+  ranked by how many songs contain them, with example songs (hand-written in `src/engine/standards.json`).
 
 ## How it works
 

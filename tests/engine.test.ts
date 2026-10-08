@@ -172,3 +172,66 @@ describe('progressions', () => {
     expect(rows[0].p).toBeGreaterThanOrEqual(rows[7].p);
   });
 });
+
+import { standardsWith, simplify, place, STANDARDS, type StandardStats } from '../src/engine/standards';
+import { loopsFrom, type LoopFile } from '../src/engine/loops';
+import { substitutes } from '../src/engine/subs';
+const json = <T,>(name: string) => JSON.parse(readFileSync(`public/data/${name}`, 'utf8')) as T;
+const names = (cs: Chord[]) => cs.map(chordName).join(' ');
+
+describe('standards', () => {
+  const stats = json<StandardStats>('standards-stats.json');
+  it('simplifies extensions into triads', () => {
+    expect(['57', '2m7', '1maj7', '7m7b5', 'b7', '4m6'].map(simplify)).toEqual(['5', '2m', '1', '7dim', 'b7', '4m']);
+  });
+  it('every standard has examples and a share in every genre', () => {
+    for (const st of STANDARDS) {
+      expect(st.examples.length).toBeGreaterThan(0);
+      for (const g of ['all', 'pop', 'folk', 'jazz', 'house']) expect(stats[g].std[st.id] ?? 0).toBeGreaterThanOrEqual(0);
+    }
+    expect(stats.all.std.pop / stats.all.songs).toBeGreaterThan(0.1);
+  });
+  it('Am starts the pop loop as the 6 in C, the Andalusian as 1 in A minor, ii-V-I in G', () => {
+    const got = standardsWith({ root: 9, type: 'm' }, stats, 'pop');
+    const by = Object.fromEntries(got.map((p) => [p.standard.id, p]));
+    expect(names(by.pop.chords)).toBe('Am F C G');
+    expect(keyName(by.pop.key)).toBe('C major');
+    expect(names(by.andalusian.chords)).toBe('Am G F E');
+    expect(names(by.twofive.chords)).toBe('Am D7 Gmaj7');
+    expect(by.three).toBeUndefined(); // no minor chord in I-IV-V
+    expect(got[0].share!).toBeGreaterThanOrEqual(got[got.length - 1].share!);
+  });
+  it('keeps your exact chord (G7 starts the pop loop as the 5)', () => {
+    const p = standardsWith({ root: 7, type: '7' }, stats, 'all').find((x) => x.standard.id === 'pop')!;
+    expect(names(p.chords)).toBe('G7 Am F C');
+  });
+  it('places a standard in any key', () => {
+    expect(names(place(STANDARDS.find((s) => s.id === 'pop')!, { tonic: 2, mode: 'major' }).chords)).toBe('D A Bm G');
+  });
+});
+
+describe('counted loops', () => {
+  it('pop, after C: the most played 4-chord runs include C G Am F and C F G C', () => {
+    const f = json<LoopFile>('loops-pop-major.json');
+    const rows = loopsFrom(C(0), { tonic: 0, mode: 'major' }, f, 4);
+    const top = rows.slice(0, 4).map((r) => names(r.chords));
+    expect(top).toContain('C G Am F');
+    expect(top).toContain('C F G C');
+    expect(rows[0].share).toBeGreaterThan(0.1);
+    expect(rows.every((r) => new Set(r.labels).size >= 3)).toBe(true);
+  });
+});
+
+describe('swap one chord', () => {
+  it('between C and G (in C), Am, Dm and F-type chords are common; never C or G', () => {
+    const cMaj = { tonic: 0, mode: 'major' as const };
+    const s = substitutes(C(0), C(5), C(7), cMaj, table('pop-major'), table('all-major'));
+    const n = s.map((x) => chordName(x.chord));
+    expect(n.length).toBe(6);
+    expect(n.some((x) => ['Am', 'Dm', 'Em'].includes(x))).toBe(true);
+    expect(n).not.toContain('C');
+    expect(n).not.toContain('G');
+    expect(n).not.toContain('F');
+    expect(s.reduce((a, b) => a + b.p, 0)).toBeLessThanOrEqual(1.0001);
+  });
+});

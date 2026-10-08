@@ -223,17 +223,68 @@ def collapse(seq):
     return out
 
 
+# Chord quality for whole-progression counting: extensions folded into the triad
+# (G7 counts as G, Am7 as Am), so "C G Am F" includes songs that play "C G7 Am7 Fmaj7".
+QUALITY = {'maj': '', '7': '', 'maj7': '', 'add9': '', '6': '', '9': '', 'maj9': '', 'sus2': '', 'sus4': '',
+           'm': 'm', 'm7': 'm', 'm6': 'm', 'm9': 'm', 'dim': 'dim', 'dim7': 'dim', 'm7b5': 'dim', 'aug': 'aug'}
+TYPE_OF_CODE = {c: t for t, c, _ in TYPES}
+LABEL_RE = re.compile(r'^(b2|b3|#4|b6|b7|[1-7])(.*)$')
+
+
+def simplify(label):
+    m = LABEL_RE.match(label)
+    return m.group(1) + QUALITY[TYPE_OF_CODE[m.group(2)]]
+
+
+def relabel(label, shift):
+    """Move a label to a key `shift` semitones away (major -> relative minor: +3)."""
+    m = LABEL_RE.match(label)
+    return DEGREES[(DEGREES.index(m.group(1)) + shift) % 12] + m.group(2)
+
+
+STANDARDS = json.load(open(os.path.join(HERE, '..', 'src', 'engine', 'standards.json')))
+
+
+def standard_patterns():
+    """For each standard and mode: the simplified patterns that count as containing it
+    (every rotation of a loop), as '|a|b|c|' strings for substring search."""
+    out = {m: [] for m in MODES}
+    for st in STANDARDS:
+        base = [simplify(l) for l in st['labels']]
+        for mode in MODES:
+            shift = 0 if mode == st['mode'] else (3 if st['mode'] == 'major' else -3)
+            seq = [simplify(relabel(l, shift)) for l in base]
+            rots = [seq[i:] + seq[:i] for i in range(len(seq))] if st['loop'] else [seq]
+            out[mode].append((st['id'], ['|' + '|'.join(r) + '|' for r in rots]))
+    return out
+
+
+PATTERNS = standard_patterns()
+
+
 # ---------------------------------------------------------------- sources
 
 class Counts:
     def __init__(self):
         self.c = {m: defaultdict(Counter) for m in MODES}
         self.songs = 0
+        self.mode_songs = Counter()
+        # whole progressions: songs containing each 3- and 4-chord run (simplified)
+        self.loops = {m: {3: Counter(), 4: Counter()} for m in MODES}
+        self.std = Counter()
 
     def add_song(self, labels, mode, weight=1.0):
         labels = collapse(labels)
         if len(labels) < 2: return
         self.songs += weight
+        self.mode_songs[mode] += weight
+        simple = collapse([simplify(l) for l in labels])
+        for n in (3, 4):
+            for w in {tuple(simple[i:i + n]) for i in range(len(simple) - n + 1)}:
+                self.loops[mode][n][w] += weight
+        text = '|' + '|'.join(simple) + '|'
+        for sid, pats in PATTERNS[mode]:
+            if any(p in text for p in pats): self.std[sid] += weight
         c = self.c[mode]
         for i, nxt in enumerate(labels):
             c[''][nxt] += weight
@@ -245,6 +296,10 @@ class Counts:
         for m in MODES:
             for ctx, cnt in other.c[m].items():
                 for k, v in cnt.items(): self.c[m][ctx][k] += v * scale
+            for n in (3, 4):
+                for k, v in other.loops[m][n].items(): self.loops[m][n][k] += v * scale
+            self.mode_songs[m] += other.mode_songs[m] * scale
+        for k, v in other.std.items(): self.std[k] += v * scale
         self.songs += other.songs
 
 
@@ -339,6 +394,19 @@ def write(outdir, genre, mode, counts, source, max_bytes=2_000_000):
     return len(text), len(table['next'])
 
 
+def write_loops(outdir, genre, mode, counts, per_start=15, min_songs=5):
+    """Most common 3- and 4-chord runs, the top `per_start` for each starting chord."""
+    out = {'genre': genre, 'mode': mode, 'songs': round(counts.mode_songs[mode]), 'loops': {}}
+    for n in (3, 4):
+        by_start = defaultdict(list)
+        for w, v in counts.loops[mode][n].most_common():
+            if v < min_songs: break
+            if len(by_start[w[0]]) < per_start: by_start[w[0]].append(['|'.join(w), round(v)])
+        out['loops'][str(n)] = [x for lst in by_start.values() for x in lst]
+    with open(os.path.join(outdir, f'loops-{genre}-{mode}.json'), 'w') as f:
+        json.dump(out, f, separators=(',', ':'))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--chordonomicon')
@@ -376,6 +444,14 @@ def main():
             if tot: counts['all'].merge(counts[g], 10000 / tot)
             source['all'] += [s for s in source[g] if s not in source['all']]
         counts['all'].songs = sum(counts[g].songs for g in GENRES[1:])
+
+    for g in GENRES:
+        for m in MODES:
+            write_loops(a.out, g, m, counts[g])
+    stats = {g: {'songs': round(counts[g].songs), 'std': {k: round(v) for k, v in counts[g].std.items()}} for g in GENRES}
+    with open(os.path.join(a.out, 'standards-stats.json'), 'w') as f: json.dump(stats, f, separators=(',', ':'))
+    print('standards (share of all songs): ' + ', '.join(
+        f"{k} {v / max(1, counts['all'].songs):.1%}" for k, v in counts['all'].std.most_common()), file=sys.stderr)
 
     index = {'genres': {}}
     for g in GENRES:

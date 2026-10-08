@@ -1,77 +1,66 @@
-import { useMemo, useState } from 'react';
-import { chordName, chordPcs, defaultVoicing } from '../theory/chord';
-import { prettyLabel } from '../theory/numerals';
-import { voiceNear } from '../theory/voiceLeading';
-import { topProgressions } from '../engine/progressions';
-import { playSequence } from '../audio/piano';
+import { useState } from 'react';
+import { chordName } from '../theory/chord';
+import { keyName } from '../theory/keys';
 import { useStore } from '../store';
-import { SLOT_COLORS } from './colors';
-import { MiniKeys } from './MiniKeys';
+import { useData } from '../engine/data';
+import { loopsFrom, type LoopFile } from '../engine/loops';
+import { standardsWith, type StandardStats } from '../engine/standards';
+import { ProgressionRow } from './ProgressionRow';
+import { pct } from './format';
+import { Examples } from './Standards';
 
-const pct = (p: number) => (p >= 0.01 ? `${Math.round(p * 100)}%` : '<1%');
-
-/** After the chord you play: the most common 4-chord ways songs continue. */
+/** After the chord you play: famous progressions it can start, then the runs real songs play most. */
 export function Progressions() {
-  const { current, currentVoicing, key, tables, settings, captureMany, trail } = useStore();
-  const [playing, setPlaying] = useState<{ row: number; step: number } | null>(null);
-  const [length, setLength] = useState(4);
+  const { current, currentVoicing, key, settings } = useStore();
+  const [length, setLength] = useState<3 | 4>(4);
+  const [moreFamous, setMoreFamous] = useState(false);
+  const [moreCounted, setMoreCounted] = useState(false);
+  const stats = useData<StandardStats>('standards-stats.json');
+  const loops = useData<LoopFile>(key ? `loops-${settings.genre}-${key.mode}.json` : null);
 
-  const rows = useMemo(() => {
-    if (!current || !key) return [];
-    const g = tables[`${settings.genre}-${key.mode}`] ?? null;
-    const all = tables[`all-${key.mode}`] ?? null;
-    const start = currentVoicing.length ? currentVoicing : defaultVoicing(current);
-    return topProgressions(current, key, g, all, { length }).map((pr) => {
-      // voice each chord close to the one before, starting from your hand
-      const voicings = [start];
-      for (const c of pr.chords.slice(1)) voicings.push(voiceNear(voicings[voicings.length - 1], chordPcs(c)));
-      return { ...pr, voicings };
-    });
-  }, [current, currentVoicing, key, tables, settings.genre, length]);
-
-  if (!current) return <p className="hint pad">Play a chord to see the progressions songs most often follow from it.</p>;
-
-  const play = (i: number) => playSequence(rows[i].voicings, settings.bpm, (step) => setPlaying(step < 0 ? null : { row: i, step }));
-  // Adds the whole progression to the loop (the first chord too, unless the loop already ends on it).
-  const use = (i: number) => {
-    const items = rows[i].chords.map((chord, j) => ({ chord, voicing: rows[i].voicings[j] }));
-    const last = trail[trail.length - 1];
-    const startsOnLast = last && last.chord.root === current.root && last.chord.type === current.type;
-    captureMany(startsOnLast ? items.slice(1) : items);
-  };
+  if (!current || !key) return <p className="hint pad">Play a chord to see the progressions that start with it.</p>;
+  const genre = settings.genre === 'all' ? '' : `${settings.genre} `;
+  const famous = standardsWith(current, stats, settings.genre);
+  const counted = loopsFrom(current, key, loops, length);
 
   return (
     <div className="progs">
+      <h3>Famous progressions that start on {chordName(current)}</h3>
+      <p className="muted small">Tap any chord to hear it and see what else fits there.</p>
+      <ol>
+        {(moreFamous ? famous : famous.slice(0, 5)).map((p) => (
+          <ProgressionRow key={p.standard.id} chords={p.chords} keyNow={p.key} loop={p.standard.loop} startVoicing={currentVoicing}
+            title={p.standard.name} subtitle={`${p.standard.aka} · in ${keyName(p.key)}`}
+            badge={p.share !== null ? `${pct(p.share)} of ${genre}songs` : undefined}
+            badgeTitle="Share of songs that contain this progression (any key)"
+            footer={<Examples st={p.standard} />} />
+        ))}
+      </ol>
+      {famous.length > 5 && (
+        <button className="more" onClick={() => setMoreFamous(!moreFamous)}>{moreFamous ? 'Show fewer' : `Show all ${famous.length}`}</button>
+      )}
+
       <div className="progs-head">
-        <span>After <b>{chordName(current)}</b>, songs most often go:</span>
+        <h3>Most played in real {genre}songs, starting on {chordName(current)}</h3>
         <label>
           Length
-          <select value={length} onChange={(e) => setLength(Number(e.target.value))}>
-            {[3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} chords</option>)}
+          <select value={length} onChange={(e) => setLength(Number(e.target.value) as 3 | 4)}>
+            <option value={3}>3 chords</option>
+            <option value={4}>4 chords</option>
           </select>
         </label>
       </div>
-      {rows.length === 0 && <p className="hint">Loading song data…</p>}
+      <p className="muted small">In {keyName(key)}. Counted across {loops ? loops.songs.toLocaleString() : '…'} songs: how many contain each run at least once.</p>
+      {!loops && <p className="hint">Loading song data…</p>}
       <ol>
-        {rows.map((r, i) => (
-          <li key={r.labels.join('|')} className="prog">
-            <div className="prog-chords">
-              {r.chords.map((c, j) => (
-                <div key={j} className={'prog-chord' + (playing?.row === i && playing.step === j ? ' playing' : '')}>
-                  <span className="pc-name">{chordName(c)}</span>
-                  <span className="pc-num">{prettyLabel(r.labels[j])}</span>
-                  <MiniKeys notes={r.voicings[j]} color={SLOT_COLORS[j % SLOT_COLORS.length]} label={false} />
-                </div>
-              ))}
-            </div>
-            <div className="prog-side">
-              <span className="prog-p" title="Share of songs that continue this way after the first chord">{pct(r.p)}</span>
-              <button onClick={() => play(i)} aria-label={`Play ${r.chords.map(chordName).join(' ')}`}>▶ Play</button>
-              <button onClick={() => use(i)}>Add to loop</button>
-            </div>
-          </li>
+        {(moreCounted ? counted : counted.slice(0, 5)).map((r) => (
+          <ProgressionRow key={r.labels.join('|')} chords={r.chords} keyNow={key} startVoicing={currentVoicing}
+            badge={`${pct(r.share)} of songs`} badgeTitle={`${r.songs.toLocaleString()} songs contain this run`} />
         ))}
       </ol>
+      {counted.length > 5 && (
+        <button className="more" onClick={() => setMoreCounted(!moreCounted)}>{moreCounted ? 'Show fewer' : `Show ${counted.length - 5} more`}</button>
+      )}
     </div>
   );
 }
